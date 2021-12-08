@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
     // continue until interrupted by another command, remove
     // this line or comment it out.
     _chassis.stop();
-    _gh.home();
+    //_gh.zeroSwitch();
     //_gh.up();
   }
 
@@ -108,5 +108,8 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    _gearController.schedule();
+
+  }
 }

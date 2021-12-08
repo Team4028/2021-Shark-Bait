@@ -19,6 +19,13 @@ public class GearHandler extends SubsystemBase {
   private TalonSRX _intake;
   private RobotController _controller = RobotController.getInstance();
 
+  private enum InfeedState {
+    RUNNING,
+    STOPPED
+  }
+
+  private InfeedState _infeedState = InfeedState.STOPPED;
+
   private enum GearTiltPidState {
     HOME,
     SCORE
@@ -31,6 +38,7 @@ public class GearHandler extends SubsystemBase {
 
     _m.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative);
     _m.setSensorPhase(false);
+    _m.setInverted(true);
     _m.setNeutralMode(NeutralMode.Coast);
     _m.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
     _m.selectProfileSlot(0, 0);
@@ -48,23 +56,25 @@ public class GearHandler extends SubsystemBase {
     _intake.configFactoryDefault();
 
     System.out.println("asd");
-    zeroSwitch();
+    //zeroSwitch();
     System.out.println(_m.getSelectedSensorPosition());
 
     _m.set(ControlMode.PercentOutput, -0.2);
   }
 
   public void zeroSwitch() {
-    if (_m.getSensorCollection().isRevLimitSwitchClosed()) {
-      _m.set(ControlMode.PercentOutput, -0.2);
+    System.out.println("zeroing switch");
+    while (_m.getSensorCollection().isRevLimitSwitchClosed()) {
+      _m.set(ControlMode.PercentOutput, 0.25);
     }
-    //
+
     _m.set(ControlMode.PercentOutput, 0.);
     _m.setSelectedSensorPosition(0);
   }
 
   public void setPidState() {
-    if (_controller.getAButtonPressed()) {
+    System.out.println("Setting pid state");
+    if (_controller.getBackButtonPressed()) {
       if (_pidState == GearTiltPidState.HOME) {
         _pidState = GearTiltPidState.SCORE;
       } else {
@@ -75,13 +85,10 @@ public class GearHandler extends SubsystemBase {
   }
 
   public void pidStateLoop() {
+    System.out.println("pid satet loop");
     switch (_pidState) {
       case HOME:
-        _m.set(ControlMode.PercentOutput, -0.2);
-        System.out.println(_m.getSensorCollection().isRevLimitSwitchClosed());
-        if (!_m.getSensorCollection().isRevLimitSwitchClosed()) {
-          _m.set(ControlMode.PercentOutput, 0.0);
-        }
+        zeroSwitch();
         break;
       case SCORE:
         score();
@@ -93,16 +100,31 @@ public class GearHandler extends SubsystemBase {
 
   public void home() {
     setTilt(0);
-    //System.out.println(_m.getSelectedSensorPosition());
   }
 
   public void score() {
-    setTilt(400);
-    System.out.println(_m.getSelectedSensorPosition());
+    setTilt(-1800);
   }
 
   public void setTilt(double pos) {
     _m.set(ControlMode.Position, pos);
+  }
+
+  public void infeedToggle() {
+    if (_controller.getAButtonPressed()) {
+      switch (_infeedState) {
+        case RUNNING:
+          _infeedState = InfeedState.STOPPED;
+          _intake.set(ControlMode.PercentOutput, 0.);
+          break;
+        case STOPPED:
+          _infeedState = InfeedState.RUNNING;
+          _intake.set(ControlMode.PercentOutput, -0.5);
+        default:
+          break;
+      }
+    }
+
   }
 
   @Override
