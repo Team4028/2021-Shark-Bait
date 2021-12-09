@@ -28,7 +28,9 @@ public class GearHandler extends SubsystemBase {
 
   private enum GearTiltPidState {
     HOME,
-    SCORE
+    SCORE,
+    FLOOR,
+    GO
   }
 
   private GearTiltPidState _pidState = GearTiltPidState.HOME;
@@ -55,15 +57,18 @@ public class GearHandler extends SubsystemBase {
     _intake = new TalonSRX(8);
     _intake.configFactoryDefault();
 
-    System.out.println("asd");
+    //System.out.println("asd");
     //zeroSwitch();
-    System.out.println(_m.getSelectedSensorPosition());
+    //System.out.println(_m.getSelectedSensorPosition());
+
+    // velocity: ~800 units per 100ms
+    
 
     _m.set(ControlMode.PercentOutput, -0.2);
   }
 
   public void zeroSwitch() {
-    System.out.println("zeroing switch");
+    //System.out.println("zeroing switch");
     while (_m.getSensorCollection().isRevLimitSwitchClosed()) {
       _m.set(ControlMode.PercentOutput, 0.25);
     }
@@ -73,37 +78,69 @@ public class GearHandler extends SubsystemBase {
   }
 
   public void setPidState() {
-    System.out.println("Setting pid state");
+    //System.out.println("Setting pid state");
     if (_controller.getBackButtonPressed()) {
-      if (_pidState == GearTiltPidState.HOME) {
+      if (_pidState == GearTiltPidState.FLOOR) {
         _pidState = GearTiltPidState.SCORE;
       } else {
-        _pidState = GearTiltPidState.HOME;
+        _pidState = GearTiltPidState.FLOOR;
       }
     }
-    System.out.println(_pidState);
+    if (_controller.getStartButtonPressed()) {
+      _pidState = GearTiltPidState.HOME;
+    }
+    if (_controller.getBButtonPressed()) {
+      _pidState = GearTiltPidState.GO;
+    }
+    //System.out.println(_pidState);
   }
 
   public void pidStateLoop() {
-    System.out.println("pid satet loop");
+    //System.out.println("pid satet loop");
+    //System.out.println(_m.getSelectedSensorPosition());
     switch (_pidState) {
       case HOME:
         zeroSwitch();
         break;
+      case FLOOR:
+        floor();
+        break;
       case SCORE:
         score();
+        break;
+      case GO:
+        go();
         break;
       default:
         break;
     }
   }
 
-  public void home() {
-    setTilt(0);
+  public void go() {
+    if (_m.getSelectedSensorPosition() > -1500) {
+      _intake.set(ControlMode.PercentOutput, 0.5);
+      floor();
+    } else {
+      _intake.set(ControlMode.PercentOutput, 0);
+      _pidState = GearTiltPidState.HOME;
+    }
   }
 
   public void score() {
-    setTilt(-1800);
+    //setTilt(-300);
+    _m.set(ControlMode.PercentOutput, -1.);
+    System.out.println(_m.getSelectedSensorVelocity());
+    // 800
+  }
+
+  public void floor() {
+  /*if (_m.getSelectedSensorPosition() > -500) {
+      setTilt(-500);
+    } else {
+      System.out.println("SNEED");
+      _m.set(ControlMode.PercentOutput, 0);
+    }*/
+    zeroSwitch();
   }
 
   public void setTilt(double pos) {
