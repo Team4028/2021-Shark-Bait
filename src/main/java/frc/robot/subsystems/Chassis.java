@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.Date;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
@@ -17,7 +19,6 @@ public class Chassis extends SubsystemBase {
   TalonSRX _BR;
   TalonSRX motor1;
   TalonSRX motor2;
-  TalonSRX motor3;
   TalonSRX motor4;
   TalonSRX motor5;
   TalonSRX motor6;
@@ -49,9 +50,6 @@ public class Chassis extends SubsystemBase {
     motor2 = new TalonSRX(5);
     motor2.configFactoryDefault();
 
-    motor3 = new TalonSRX(4);
-    motor3.configFactoryDefault();
-
     motor4 = new TalonSRX(3);
     motor4.configFactoryDefault();
 
@@ -64,7 +62,15 @@ public class Chassis extends SubsystemBase {
   }
 
   public void controllerDrive() {
-    drive(-_controller.getLeftYAxis(), _controller.getRightXAxis());
+    if (_controller.getBButton()) {
+      System.out.println(_controller.getBButtonPressed());
+    }
+
+    if (_controller.getBButton()) {
+      drive(-0.3, 0);
+    } else {
+      drive(-_controller.getLeftYAxis(), _controller.getRightXAxis());
+    }
   }
 
   public void drive(double throttle, double turn) {

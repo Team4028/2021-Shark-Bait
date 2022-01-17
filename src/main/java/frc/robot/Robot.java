@@ -7,8 +7,10 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.BallController;
 import frc.robot.commands.ChassisControllerDrive;
 import frc.robot.commands.GearController;
+import frc.robot.subsystems.BallInfeed;
 import frc.robot.subsystems.Chassis;
 import frc.robot.subsystems.GearHandler;
 
@@ -22,14 +24,16 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private ChassisControllerDrive _chassisControllerDrive;
   private GearController _gearController;
+  private BallController _ballController;
 
   private Chassis _chassis;
   private GearHandler _gh;
+  private BallInfeed _bi;
 
   private RobotContainer m_robotContainer;
 
   /**
-   * This function is run when the robot is first started up and should be used for any
+   *THhis function is run when the robot is first started up and should be used for any
    * initialization code.
    */
   @Override
@@ -39,9 +43,11 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     _chassisControllerDrive = new ChassisControllerDrive();
     _gearController = new GearController();
+    _ballController = new BallController();
     
     _chassis = new Chassis();
     _gh = new GearHandler();
+    //_bi = new BallInfeed();
   }
 
   /**
@@ -89,6 +95,7 @@ public class Robot extends TimedRobot {
     // continue until interrupted by another command, remove
     // this line or comment it out.
     _chassis.stop();
+    //_bi.stop();
     //_gh.zeroSwitch();
     //_gh.up();
   }
@@ -98,6 +105,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     _gearController.schedule();
     _chassisControllerDrive.schedule();
+    _ballController.schedule();
   }
 
   @Override

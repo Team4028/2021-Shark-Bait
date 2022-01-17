@@ -48,11 +48,7 @@ public class GearHandler extends SubsystemBase {
     _m.configNominalOutputForward(0.0f, 0);
 		_m.configNominalOutputReverse(0.0f, 0);
 		_m.configPeakOutputForward(3., 0);
-		_m.configPeakOutputReverse(-6.0, 0); 
-
-    _m.config_kP(0, 1.);
-    _m.config_kI(0, 0.);
-    _m.config_kD(0, 50.);
+		_m.configPeakOutputReverse(-6.0, 0);
 
     _intake = new TalonSRX(8);
     _intake.configFactoryDefault();
@@ -62,7 +58,14 @@ public class GearHandler extends SubsystemBase {
     //System.out.println(_m.getSelectedSensorPosition());
 
     // velocity: ~800 units per 100ms
-    
+    _m.configMotionCruiseVelocity(800);
+    _m.configMotionAcceleration(800);
+
+    _m.config_kF(0, .25);
+    _m.config_kP(0, 2.);
+    _m.config_kI(0, 0.);
+    _m.config_IntegralZone(0, 50);
+    _m.config_kD(0, 50.);
 
     _m.set(ControlMode.PercentOutput, -0.2);
   }
@@ -127,24 +130,21 @@ public class GearHandler extends SubsystemBase {
   }
 
   public void score() {
-    //setTilt(-300);
-    _m.set(ControlMode.PercentOutput, -1.);
-    System.out.println(_m.getSelectedSensorVelocity());
-    // 800
+    setTilt(-300);
   }
 
   public void floor() {
-  /*if (_m.getSelectedSensorPosition() > -500) {
-      setTilt(-500);
-    } else {
+    //if (_m.getSelectedSensorPosition() > -1500) {
+    _m.set(ControlMode.Position, -2000);
+    System.out.println(_m.getSelectedSensorPosition());
+    /*} else {
       System.out.println("SNEED");
       _m.set(ControlMode.PercentOutput, 0);
     }*/
-    zeroSwitch();
   }
 
   public void setTilt(double pos) {
-    _m.set(ControlMode.Position, pos);
+    _m.set(ControlMode.MotionMagic, pos);
   }
 
   public void infeedToggle() {
